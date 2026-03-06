@@ -111,26 +111,100 @@ body {
   margin-bottom: 10px
 }
 
-.mock-panel-body textarea {
-  width: 100%;
-  background: rgba(255, 255, 255, .06);
-  border: 1px solid rgba(192, 132, 252, .2);
-  border-radius: 10px;
-  color: #f3e8ff;
-  padding: 12px;
-  font-size: .82rem;
-  resize: vertical;
-  font-family: inherit;
-  outline: none
+.mock-msg-list {
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, .3) transparent
 }
 
-.mock-panel-body textarea:focus {
-  border-color: #a78bfa
+.mock-msg-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(192, 132, 252, .15);
+  border-radius: 10px;
+  padding: 8px 10px;
+  animation: bubbleIn .2s ease-out
+}
+
+.mock-msg-num {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(167, 139, 250, .25);
+  color: #e9d5ff;
+  font-size: .68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+  flex-shrink: 0
+}
+
+.mock-msg-item textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #f3e8ff;
+  font-size: .78rem;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  line-height: 1.5;
+  min-height: 32px;
+  padding: 2px 0
+}
+
+.mock-msg-del {
+  background: none;
+  border: none;
+  color: rgba(248, 113, 113, .6);
+  font-size: .9rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  margin-top: 2px;
+  transition: .2s;
+  flex-shrink: 0
+}
+
+.mock-msg-del:hover {
+  color: #f87171
+}
+
+.mock-btn-row {
+  display: flex;
+  gap: 8px
+}
+
+.mock-add-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1.5px dashed rgba(167, 139, 250, .3);
+  border-radius: 10px;
+  background: transparent;
+  color: #c4b5fd;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: .82rem;
+  transition: .2s;
+  font-family: inherit
+}
+
+.mock-add-btn:hover {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, .08);
+  color: #e9d5ff
 }
 
 .mock-save-btn {
-  width: 100%;
-  margin-top: 10px;
+  flex: 1;
   padding: 10px;
   border: none;
   border-radius: 10px;
@@ -139,7 +213,8 @@ body {
   font-weight: 700;
   cursor: pointer;
   font-size: .85rem;
-  transition: .2s
+  transition: .2s;
+  font-family: inherit
 }
 
 .mock-save-btn:hover {

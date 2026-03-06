@@ -451,17 +451,66 @@
     $('#youtubeBtn').addEventListener('click', () => rewardUseModal.classList.remove('open'));
 
     // ═══════════════════════════════════════
-    //  Mock 메시지 패널
+    //  Mock 메시지 패널 (개별 카드 방식)
     // ═══════════════════════════════════════
-    const mockArea = $('#mockMessagesArea');
+    const mockList = $('#mockMsgList');
     const mockBody = $('#mockBody');
-    mockArea.value = aiMessages.join('\n');
+
+    function renderMockCards() {
+        mockList.innerHTML = '';
+        aiMessages.forEach((msg, i) => {
+            const item = document.createElement('div');
+            item.className = 'mock-msg-item';
+            item.innerHTML = `
+                <div class="mock-msg-num">${i + 1}</div>
+                <textarea rows="2" data-idx="${i}">${msg}</textarea>
+                <button class="mock-msg-del" data-idx="${i}">✕</button>
+            `;
+            mockList.appendChild(item);
+        });
+        // textarea 자동 높이 조절
+        mockList.querySelectorAll('textarea').forEach(ta => {
+            ta.style.height = 'auto';
+            ta.style.height = ta.scrollHeight + 'px';
+            ta.addEventListener('input', () => {
+                ta.style.height = 'auto';
+                ta.style.height = ta.scrollHeight + 'px';
+            });
+        });
+        // 삭제 버튼
+        mockList.querySelectorAll('.mock-msg-del').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                if (aiMessages.length > 1) {
+                    aiMessages.splice(idx, 1);
+                    renderMockCards();
+                }
+            });
+        });
+    }
+
+    renderMockCards();
 
     $('#mockToggle').addEventListener('click', () => mockBody.classList.toggle('open'));
+
+    // 응답 추가
+    $('#mockAddBtn').addEventListener('click', () => {
+        aiMessages.push('새 응답 메시지를 입력하세요.');
+        renderMockCards();
+        mockList.scrollTop = mockList.scrollHeight;
+    });
+
+    // 저장
     $('#mockSaveBtn').addEventListener('click', () => {
-        const lines = mockArea.value.split('\n').filter((l) => l.trim());
-        if (lines.length) {
-            aiMessages = lines;
+        const textareas = mockList.querySelectorAll('textarea');
+        const newMessages = [];
+        textareas.forEach(ta => {
+            const val = ta.value.trim();
+            if (val) newMessages.push(val);
+        });
+        if (newMessages.length) {
+            aiMessages = newMessages;
+            renderMockCards();
             showToast('✅ AI 메시지가 저장되었습니다');
         }
     });
