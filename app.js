@@ -12,14 +12,48 @@
         { id: 'char6', name: '다은', emoji: '🩷', color: '#f9a8d4' },
     ];
 
-    // 각 캐릭터별 데이터 저장
-    const charData = {};
-    characters.forEach(c => {
-        charData[c.id] = {
-            profileUrl: '',       // 프로필 이미지 URL
-            chatImages: [],       // 채팅용 이미지 URL 배열
-        };
-    });
+    // 각 캐릭터별 데이터 저장 (프로필 + 일상사진)
+    const charData = {
+        char1: {
+            profileUrl: 'images/profiles/profile_harin_1772777927736.png',
+            chatImages: [
+                'images/daily/harin_daily1_1772778091904.png',
+                'images/daily/harin_daily2_1772778109816.png',
+                'images/daily/harin_daily3_1772778124705.png',
+                'images/daily/harin_daily4_1772778147972.png',
+            ],
+        },
+        char2: {
+            profileUrl: 'images/profiles/profile_yuna_1772777961962.png',
+            chatImages: [
+                'images/daily/yuna_daily1_1772778175781.png',
+                'images/daily/yuna_daily2_1772778192276.png',
+                'images/daily/yuna_daily3_1772778225253.png',
+                'images/daily/yuna_daily4_1772778238978.png',
+            ],
+        },
+        char3: {
+            profileUrl: 'images/profiles/profile_seoyun_1772777977803.png',
+            chatImages: [
+                'images/daily/seoyun_daily1_1772778256329.png',
+                'images/daily/seoyun_daily2_1772778281469.png',
+                'images/daily/seoyun_daily3_1772778299780.png',
+                'images/daily/seoyun_daily4_1772778312374.png',
+            ],
+        },
+        char4: {
+            profileUrl: 'images/profiles/profile_jiwoo_1772778001173.png',
+            chatImages: [],
+        },
+        char5: {
+            profileUrl: 'images/profiles/profile_minseo_1772778046950.png',
+            chatImages: [],
+        },
+        char6: {
+            profileUrl: 'images/profiles/profile_daeun_1772778064133.png',
+            chatImages: [],
+        },
+    };
 
     // ───── 상태 ─────
     let affinity = 0;
