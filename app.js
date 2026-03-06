@@ -4,12 +4,12 @@
 
     // ───── 캐릭터 데이터 ─────
     const characters = [
-        { id: 'char1', name: '하린', emoji: '💜', color: '#c084fc' },
-        { id: 'char2', name: '유나', emoji: '💖', color: '#f472b6' },
-        { id: 'char3', name: '서윤', emoji: '🧡', color: '#fb923c' },
-        { id: 'char4', name: '지우', emoji: '💙', color: '#60a5fa' },
-        { id: 'char5', name: '민서', emoji: '💚', color: '#34d399' },
-        { id: 'char6', name: '다은', emoji: '🩷', color: '#f9a8d4' },
+        { id: 'char1', name: '시우', emoji: '💜', color: '#c084fc' },
+        { id: 'char2', name: '도윤', emoji: '💖', color: '#f472b6' },
+        { id: 'char3', name: '준혁', emoji: '🧡', color: '#fb923c' },
+        { id: 'char4', name: '현우', emoji: '💙', color: '#60a5fa' },
+        { id: 'char5', name: '태민', emoji: '💚', color: '#34d399' },
+        { id: 'char6', name: '재현', emoji: '🩷', color: '#f9a8d4' },
     ];
 
     // 각 캐릭터별 데이터 저장 (프로필 + 일상사진)
