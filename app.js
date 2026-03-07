@@ -80,11 +80,25 @@
     let affinity = 0;
     let signTickets = 0;
     let consultTickets = 0;
-    let aiMsgIndex = 0;
     let chatStarted = false;
-    let userMsgCount = 0;        // 유저 메시지 횟수 (이미지 표시 타이밍용)
     let selectedPersonaChar = null;
     let selectedChatChar = null;
+
+    // 퀴즈 페이지 시스템
+    let currentQuizPage = 0;           // 현재 퀴즈 페이지 (0-indexed)
+    let quizCleared = [];              // 각 페이지 클리어 여부
+    let quizPageChatHistory = [];      // 각 페이지별 채팅 히스토리
+    let normalChatCount = 0;           // 일반 채팅 횟수 (3회마다 +1 호감도)
+    let currentPageUserMsgCount = 0;   // 현재 페이지에서의 유저 메시지 수
+
+    // 퀴즈별 상태바 정보
+    const quizStatusData = [
+        { location: '📍 차 안', time: '🕐 이른 새벽', state: '😴 피곤한 상태' },
+        { location: '📍 메이크업 샵', time: '🕐 이른 아침', state: '🪞 메이크업 준비 중' },
+        { location: '📍 메이크업 샵', time: '🕐 아침', state: '☕ 커피가 필요한 상태' },
+        { location: '📍 메이크업 샵', time: '🕐 아침', state: '😰 긴장하기 시작' },
+        { location: '📍 방송국 대기실', time: '🕐 오전', state: '😱 물건 분실 당황' },
+    ];
 
     // 기본 AI Mock 메시지
     let aiMessages = [
@@ -323,30 +337,151 @@
 
     function resetChat() {
         chatStarted = false;
-        aiMsgIndex = 0;
+        currentQuizPage = 0;
         affinity = 0;
-        userMsgCount = 0;
+        normalChatCount = 0;
+        currentPageUserMsgCount = 0;
+        quizCleared = aiMessages.map(() => false);
+        quizPageChatHistory = aiMessages.map(() => []);
         $('#affinityFill').style.width = '0%';
         $('#affinityText').textContent = '0 / 100';
         $('#chatStartWrap').style.display = 'flex';
         $('#chatInputWrap').style.display = 'none';
+        $('#missionPopup').style.display = 'none';
         const existing = $('#chatMessages');
         if (existing) existing.remove();
+        updateNavButtons();
     }
 
-    // 채팅 시작
-    $('#chatStartBtn').addEventListener('click', () => {
-        if (chatStarted) return;
-        chatStarted = true;
-        $('#chatStartWrap').style.display = 'none';
-        $('#chatInputWrap').style.display = 'flex';
+    // 상태바 업데이트
+    function updateStatusBar(pageIdx) {
+        const data = quizStatusData[pageIdx] || quizStatusData[quizStatusData.length - 1];
+        $('#statusLocation').textContent = data.location;
+        $('#statusTime').textContent = data.time;
+        $('#statusState').textContent = data.state;
+    }
+
+    // 네비게이션 버튼 상태 업데이트
+    function updateNavButtons() {
+        const prevBtn = $('#prevPageBtn');
+        const nextBtn = $('#nextPageBtn');
+
+        // 이전 버튼
+        prevBtn.disabled = currentQuizPage <= 0;
+
+        // 다음 버튼: 현재 페이지 클리어 시만 활성화
+        if (currentQuizPage < aiMessages.length - 1 && quizCleared[currentQuizPage]) {
+            nextBtn.disabled = false;
+            nextBtn.classList.add('active');
+        } else {
+            nextBtn.disabled = true;
+            nextBtn.classList.remove('active');
+        }
+    }
+
+    // 퀴즈 페이지 렌더링
+    function renderQuizPage(pageIdx) {
+        currentQuizPage = pageIdx;
+        currentPageUserMsgCount = 0;
+        updateStatusBar(pageIdx);
+        updateNavButtons();
+
+        // 채팅 영역 초기화
+        const existingContainer = $('#chatMessages');
+        if (existingContainer) existingContainer.remove();
+        $('#missionPopup').style.display = 'none';
 
         const msgContainer = document.createElement('div');
         msgContainer.className = 'chat-messages';
         msgContainer.id = 'chatMessages';
         $('#chatArea').appendChild(msgContainer);
 
-        showTypingThenMessage();
+        // 저장된 히스토리가 있으면 복원
+        const history = quizPageChatHistory[pageIdx];
+        if (history && history.length > 0) {
+            history.forEach(item => {
+                if (item.type === 'ai-segment') {
+                    if (item.segType === 'dialogue') {
+                        const b = document.createElement('div');
+                        b.className = 'chat-bubble ai';
+                        b.textContent = item.text;
+                        msgContainer.appendChild(b);
+                    } else if (item.segType === 'action') {
+                        const el = document.createElement('div');
+                        el.className = 'chat-action-text';
+                        el.textContent = item.text;
+                        msgContainer.appendChild(el);
+                    } else if (item.segType === 'mission') {
+                        $('#missionText').textContent = item.text;
+                        if (!quizCleared[pageIdx]) {
+                            $('#missionPopup').style.display = 'block';
+                        }
+                    }
+                } else if (item.type === 'user') {
+                    const b = document.createElement('div');
+                    b.className = 'chat-bubble user';
+                    b.textContent = item.text;
+                    msgContainer.appendChild(b);
+                } else if (item.type === 'image') {
+                    const img = document.createElement('img');
+                    img.className = 'chat-image';
+                    img.src = item.url;
+                    msgContainer.appendChild(img);
+                }
+            });
+            scrollToBottom();
+        } else {
+            // 새 페이지: AI 메시지 표시
+            showQuizMessage(pageIdx);
+        }
+    }
+
+    // 퀴즈 AI 메시지 표시
+    function showQuizMessage(pageIdx) {
+        const container = $('#chatMessages');
+        if (!container || pageIdx >= aiMessages.length) return;
+
+        const typing = document.createElement('div');
+        typing.className = 'typing-indicator';
+        typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+        container.appendChild(typing);
+        scrollToBottom();
+
+        setTimeout(() => {
+            typing.remove();
+            const segments = parseAiMessage(aiMessages[pageIdx]);
+            addAiSegments(segments);
+
+            // 히스토리에 저장
+            segments.forEach(seg => {
+                quizPageChatHistory[pageIdx].push({ type: 'ai-segment', segType: seg.type, text: seg.text });
+            });
+        }, 1200);
+    }
+
+    // 채팅 시작
+    $('#chatStartBtn').addEventListener('click', () => {
+        if (chatStarted) return;
+        chatStarted = true;
+        quizCleared = aiMessages.map(() => false);
+        quizPageChatHistory = aiMessages.map(() => []);
+        $('#chatStartWrap').style.display = 'none';
+        $('#chatInputWrap').style.display = 'flex';
+
+        renderQuizPage(0);
+    });
+
+    // 페이지 네비게이션
+    $('#prevPageBtn').addEventListener('click', () => {
+        if (currentQuizPage > 0) {
+            renderQuizPage(currentQuizPage - 1);
+        }
+    });
+
+    $('#nextPageBtn').addEventListener('click', () => {
+        if (currentQuizPage < aiMessages.length - 1 && quizCleared[currentQuizPage]) {
+            renderQuizPage(currentQuizPage + 1);
+        }
     });
 
     // 메시지 전송
@@ -362,20 +497,72 @@
 
         addBubble(text, 'user');
         input.value = '';
-        userMsgCount++;
+        currentPageUserMsgCount++;
+
+        // 히스토리에 저장
+        quizPageChatHistory[currentQuizPage].push({ type: 'user', text });
 
         // 미션 팝업 숨기기
         $('#missionPopup').style.display = 'none';
 
-        // 호감도 증가 (5씩)
-        increaseAffinity();
+        // 퀴즈 클리어 처리 (첫 번째 응답으로 클리어)
+        if (!quizCleared[currentQuizPage]) {
+            quizCleared[currentQuizPage] = true;
+            // 퀴즈 정답 호감도 +5
+            increaseAffinity(5);
+            updateNavButtons();
+        } else {
+            // 일반 채팅 호감도 (3회마다 +1)
+            normalChatCount++;
+            if (normalChatCount % 3 === 0) {
+                increaseAffinity(1);
+            }
+        }
 
-        // AI 응답
-        setTimeout(() => showTypingThenMessage(), 800);
+        // AI 응답 (현재 페이지의 퀴즈 이후 일반 대화)
+        setTimeout(() => showFollowUpMessage(), 800);
+    }
+
+    // 후속 메시지 (퀴즈 클리어 후 간단 리액션)
+    function showFollowUpMessage() {
+        const container = $('#chatMessages');
+        if (!container) return;
+
+        const typing = document.createElement('div');
+        typing.className = 'typing-indicator';
+        typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+        container.appendChild(typing);
+        scrollToBottom();
+
+        const followUps = [
+            '역시 우리 매니저님! 😊',
+            '오~ 매니저님 센스 대박이에요!',
+            '역시 짬에서 나오는 실력! 감사해요~',
+            '매니저님 있으니까 든든해요 💜',
+            '헤헤, 매니저님이 제일 잘 알아주시네요!',
+        ];
+
+        setTimeout(() => {
+            typing.remove();
+            const msg = followUps[currentQuizPage % followUps.length];
+            addBubble(msg, 'ai');
+            quizPageChatHistory[currentQuizPage].push({ type: 'ai-segment', segType: 'dialogue', text: msg });
+
+            // 이미지 표시 (퀴즈 클리어 시 1회)
+            if (currentPageUserMsgCount === 1 && selectedChatChar) {
+                const images = charData[selectedChatChar.id].chatImages;
+                if (images.length > 0) {
+                    const randImg = images[Math.floor(Math.random() * images.length)];
+                    setTimeout(() => {
+                        addChatImage(randImg);
+                        quizPageChatHistory[currentQuizPage].push({ type: 'image', url: randImg });
+                    }, 400);
+                }
+            }
+        }, 1000);
     }
 
     // ───── AI 메시지 파싱 ─────
-    // 텍스트를 세그먼트로 분리: dialogue, action, direction
     function parseAiMessage(text) {
         const lines = text.split('\n');
         const segments = [];
@@ -395,7 +582,6 @@
         return segments;
     }
 
-    // 세그먼트를 순차적으로 채팅에 추가
     function addAiSegments(segments) {
         const container = $('#chatMessages');
         if (!container) return;
@@ -452,39 +638,6 @@
         scrollToBottom();
     }
 
-    function showTypingThenMessage() {
-        const container = $('#chatMessages');
-        if (!container) return;
-
-        const typing = document.createElement('div');
-        typing.className = 'typing-indicator';
-        typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-        container.appendChild(typing);
-        scrollToBottom();
-
-        setTimeout(() => {
-            typing.remove();
-
-            // 텍스트 메시지
-            if (aiMsgIndex < aiMessages.length) {
-                const segments = parseAiMessage(aiMessages[aiMsgIndex]);
-                addAiSegments(segments);
-                aiMsgIndex++;
-            } else {
-                addBubble('💜 (더 이상의 메시지가 없습니다)', 'ai');
-            }
-
-            // 2턴에 한 번씩 이미지 표시
-            if (selectedChatChar && userMsgCount > 0 && userMsgCount % 2 === 0) {
-                const images = charData[selectedChatChar.id].chatImages;
-                if (images.length > 0) {
-                    const randImg = images[Math.floor(Math.random() * images.length)];
-                    setTimeout(() => addChatImage(randImg), 400);
-                }
-            }
-        }, 1200);
-    }
-
     function scrollToBottom() {
         const area = $('#chatArea');
         requestAnimationFrame(() => {
@@ -493,9 +646,10 @@
     }
 
     // ───── 호감도 & 리워드 ─────
-    function increaseAffinity() {
+    function increaseAffinity(amount) {
         if (affinity >= 100) return;
-        affinity += 5;
+        amount = amount || 5;
+        affinity += amount;
         if (affinity > 100) affinity = 100;
 
         $('#affinityFill').style.width = affinity + '%';

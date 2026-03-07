@@ -97,17 +97,35 @@
 
                 <!-- 2-B: 채팅 화면 -->
                 <div id="chatMainView" style="display:none;">
-                    <!-- 호감도 게이지 -->
+                    <!-- 상단 상태바 -->
+                    <div class="chat-status-bar" id="chatStatusBar">
+                        <span class="status-location" id="statusLocation">📍 차 안</span>
+                        <span class="status-divider">|</span>
+                        <span class="status-time" id="statusTime">🕐 이른 새벽</span>
+                        <span class="status-divider">|</span>
+                        <span class="status-state" id="statusState">😴 피곤한 상태</span>
+                    </div>
+                    <!-- 호감도 게이지 + 페이지 이동 -->
                     <div class="affinity-bar-wrap">
-                        <div class="affinity-label">
-                            <span class="affinity-left">
-                                <img id="affinityProfileImg" class="affinity-profile" src="" alt="">
-                                <span>❤️ 호감도</span>
-                            </span>
-                            <span id="affinityText">0 / 100</span>
-                        </div>
-                        <div class="affinity-track">
-                            <div class="affinity-fill" id="affinityFill" style="width:0%"></div>
+                        <div class="affinity-nav-row">
+                            <button class="page-nav-btn" id="prevPageBtn" disabled>◀</button>
+                            <div class="affinity-center">
+                                <div class="affinity-label">
+                                    <span class="affinity-left">
+                                        <img id="affinityProfileImg" class="affinity-profile" src="" alt="">
+                                        <span>❤️ 호감도</span>
+                                    </span>
+                                    <span id="affinityText">0 / 100</span>
+                                </div>
+                                <div class="affinity-track">
+                                    <div class="affinity-fill" id="affinityFill" style="width:0%"></div>
+                                    <div class="affinity-ticks">
+                                        <span></span><span></span><span></span><span></span><span></span>
+                                        <span></span><span></span><span></span><span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="page-nav-btn" id="nextPageBtn" disabled>▶</button>
                         </div>
                     </div>
                     <!-- 채팅 영역 -->
