@@ -100,43 +100,47 @@
         { location: '📍 방송국 대기실', time: '🕐 오전', state: '😱 물건 분실 당황' },
     ];
 
-    // 기본 AI Mock 메시지
+    // 기본 AI Mock 메시지 (2차원 배열: 페이지별 메시지 목록)
     let aiMessages = [
-        `"아우, 매니저님~ 오늘 사녹 너무 일찍 시작한 거 아니에요? 저 아직 눈도 못 떴어요... 어? 근데 벌써 샵 앞이에요? 밖에 아직 어두컴컴한데 벌써부터 와서 기다려주시는 팬분들이 계시네요... 날도 추운데 진짜 대단하시다."
+        [`"아우, 매니저님~ 오늘 사녹 너무 일찍 시작한 거 아니에요? 저 아직 눈도 못 떴어요..."
 
-*매니저는 샵에 들어가기 전, 차량 주변으로 몰려드는 팬들의 안전을 위해 팬덤의 공식 애칭을 다정하게 부르며 길을 터달라고 정중히 부탁해야 한다.*`,
-        `"휴, 매니저님이 우리 루미기들 다치지 않게 부드럽게 정리해주시니까 무사히 잘 들어왔네요! 역시 우리 매니저님 센스랑 짬바는 무시 못 해~ 아침부터 완전 든든하다니까요."
+*(부스스한 머리를 긁적이며 밴 창밖을 내다보더니 눈을 동그랗게 뜬다)*
 
-(샵 안으로 들어와 메이크업 의자에 털썩 주저앉으며 거울을 본다)
+"어? 근데 벌써 샵 앞이에요? 밖에 아직 어두컴컴한데 벌써부터 와서 기다려주시는 팬분들이 계시네요... 날도 추운데 진짜 대단하시다."
+
+*매니저는 샵에 들어가기 전, 차량 주변으로 몰려드는 팬들의 안전을 위해 팬덤의 공식 애칭을 다정하게 부르며 길을 터달라고 정중히 부탁해야 한다.*`],
+        [`"휴, 매니저님이 우리 루미기들 다치지 않게 부드럽게 정리해주시니까 무사히 잘 들어왔네요! 역시 우리 매니저님 센스랑 짬바는 무시 못 해~ 아침부터 완전 든든하다니까요."
+
+*(샵 안으로 들어와 메이크업 의자에 털썩 주저앉으며 거울을 본다)*
 
 "아... 샵 조명 너무 밝아서 눈부셔요. 푹신한 의자에 앉으니까 또 졸리네. 으아, 근데 매니저님, 저 아까 밴에서 히터 바람을 너무 직빵으로 맞았나 봐요. 여기가 너무 건조해서 쩍쩍 갈라지고 피날 것 같은 기분이에요. 쌤들 메이크업 시작하시기 전에 빨리 응급처치 좀 해주세요. 저 화장할 때 여기 피부 컨디션 제일 신경 쓰는 거 아시죠?"
 
-*매니저는 시우가 메이크업을 시작하기 전 항상 가장 예민하게 신경 써달라고 부탁하는 부위가 어디인지 떠올리며, 건조함을 달래줄 필수 아이템(보습제)을 꺼내 발라주거나 건네주어야 한다.*`,
-        `"아~ 살겠다! 역시 우리 매니저님, 제 입술 찢어질 것 같이 건조한 거 귀신같이 아시고 바로 립밤 대령해주시네. 듬뿍 바르니까 이제야 좀 살 것 같아요, 고마워요!"
+*매니저는 시우가 메이크업을 시작하기 전 항상 가장 예민하게 신경 써달라고 부탁하는 부위가 어디인지 떠올리며, 건조함을 달래줄 필수 아이템(보습제)을 꺼내 발라주거나 건네주어야 한다.*`],
+        [`"아~ 살겠다! 역시 우리 매니저님, 제 입술 찢어질 것 같이 건조한 거 귀신같이 아시고 바로 립밤 대령해주시네. 듬뿍 바르니까 이제야 좀 살 것 같아요, 고마워요!"
 
-(메이크업 의자에 기대어 립밤을 바른 입술을 오물거리더니 거울 너머로 매니저를 쳐다본다)
+*(메이크업 의자에 기대어 립밤을 바른 입술을 오물거리더니 거울 너머로 매니저를 쳐다본다)*
 
 "근데 매니저님... 저 눈이 자꾸 감겨요. 이대로 사녹 무대 올라가면 안무 다 틀릴지도 몰라요. 저 텐션 확 끌어올리게 제 '생명수' 좀 사다 주시면 안 돼요? 아까 보니까 샵 옆에 있는 카페 열었던데! 저 맨날 마시는 고정 메뉴 있잖아요, 어떻게 타야 하는지 디테일 다 아시죠? 매니저님만 믿을게요!"
 
-*매니저는 시우가 매일 아침 찾는 최애 커피 메뉴(온도, 샷 농도, 추가하는 시럽 종류 포함)를 떠올리며, 카페에 가서 주문할 메뉴를 정확하게 말해야 한다.*`,
-        `"와!! 이거지, 이거! 아아 연하게 헤이즐넛 시럽 추가! 역시 매니저님, 비율 기가 막히게 주문해 오셨네요."
+*매니저는 시우가 매일 아침 찾는 최애 커피 메뉴(온도, 샷 농도, 추가하는 시럽 종류 포함)를 떠올리며, 카페에 가서 주문할 메뉴를 정확하게 말해야 한다.*`],
+        [`"와!! 이거지, 이거! 아아 연하게 헤이즐넛 시럽 추가! 역시 매니저님, 비율 기가 막히게 주문해 오셨네요."
 
-(빨대로 한 모금 쭉 마시며 눈을 번쩍 뜬다)
+*(빨대로 한 모금 쭉 마시며 눈을 번쩍 뜬다)*
 
 "캬~ 이제야 뇌가 좀 돌아가는 기분이에요. 당이랑 카페인 쫙 들어가니까 눈이 떠지네. 진짜 매니저님 없었으면 저 오늘 샵에서 기절했을 거예요."
 
-(메이크업이 어느 정도 끝나고 무대 의상으로 갈아입기 전, 거울을 보며 살짝 굳은 표정을 짓는다)
+*(메이크업이 어느 정도 끝나고 무대 의상으로 갈아입기 전, 거울을 보며 살짝 굳은 표정을 짓는다)*
 
 "근데 매니저님... 오늘 컴백 첫 사녹이라 그런가 저 갑자기 엄청 떨려요. 안무 동선 꼬이면 어떡하죠? 카메라 불 들어오는 거 잘 찾을 수 있겠죠? 아, 큰일 났다. 입이 바짝바짝 마르네..."
 
-*매니저는 시우가 극도로 긴장했을 때 무의식적으로 계속 만지작거리는 특정 신체 부위가 어딘지 발견하고, 그 부위를 언급하며 손을 떼게 하거나 긴장을 풀어주는 말을 건네야 한다.*`,
-        `"아차! 저 또 오른쪽 귀 만지고 있었어요? 아유, 진짜 매니저님 앞에서는 긴장한 걸 숨길 수가 없네. 매니저님 말대로 심호흡 크게 한 번 하고 올게요. 쓰읍, 후~ 아자아자!"
+*매니저는 시우가 극도로 긴장했을 때 무의식적으로 계속 만지작거리는 특정 신체 부위가 어딘지 발견하고, 그 부위를 언급하며 손을 떼게 하거나 긴장을 풀어주는 말을 건네야 한다.*`],
+        [`"아차! 저 또 오른쪽 귀 만지고 있었어요? 아유, 진짜 매니저님 앞에서는 긴장한 걸 숨길 수가 없네. 매니저님 말대로 심호흡 크게 한 번 하고 올게요. 쓰읍, 후~ 아자아자!"
 
-(방송국에 도착해 드라이브스루에서 사 온 커피를 들고 대기실로 들어와 짐을 푼다)
+*(방송국에 도착해 드라이브스루에서 사 온 커피를 들고 대기실로 들어와 짐을 푼다)*
 
 "휴, 대기실 오니까 진짜 실감 나네요. 얼른 목 좀 풀고 인이어 세팅해야겠다... 어라? 잠깐만요. 매니저님, 제 파우치 안에 그게 없어요! 헐, 어떡해. 저 무대 올라갈 때 그거 없으면 절대 안 되는 거 아시잖아요. 저한테 완전 부적 같은 건데! 오늘 컴백 첫 무대라 무조건 그거 껴야 한단 말이에요!"
 
-*매니저는 시우가 데뷔 때 팬에게 선물 받아 가장 아끼는 애착 물건인 '이것(음향 장비)'을 잃어버린 줄 알고 당황해하는 시우를 진정시키며, 따로 챙겨둔 '이것'을 꺼내어 건네주어야 한다.*`,
+*매니저는 시우가 데뷔 때 팬에게 선물 받아 가장 아끼는 애착 물건인 '이것(음향 장비)'을 잃어버린 줄 알고 당황해하는 시우를 진정시키며, 따로 챙겨둔 '이것'을 꺼내어 건네주어야 한다.*`],
     ];
 
     // ───── DOM 유틸 ─────
@@ -449,7 +453,7 @@
 
         setTimeout(() => {
             typing.remove();
-            const segments = parseAiMessage(aiMessages[pageIdx]);
+            const segments = parseAiMessage(aiMessages[pageIdx][0]);
             addAiSegments(segments);
 
             // 히스토리에 저장
@@ -563,6 +567,22 @@
     }
 
     // ───── AI 메시지 파싱 ─────
+    // 대사를 문장 단위(. ! ? ~)로 분리
+    function splitDialogue(text) {
+        const result = [];
+        const parts = text.split(/(?<=[.!?~…]) /);
+        let buf = '';
+        for (const part of parts) {
+            buf += (buf ? ' ' : '') + part;
+            if (/[.!?~…]$/.test(buf.trim())) {
+                result.push(buf.trim());
+                buf = '';
+            }
+        }
+        if (buf.trim()) result.push(buf.trim());
+        return result.length ? result : [text];
+    }
+
     function parseAiMessage(text) {
         const lines = text.split('\n');
         const segments = [];
@@ -570,13 +590,21 @@
             const trimmed = line.trim();
             if (!trimmed) continue;
             if (trimmed.startsWith('*') && trimmed.endsWith('*')) {
-                segments.push({ type: 'mission', text: trimmed.slice(1, -1) });
+                const inner = trimmed.slice(1, -1).trim();
+                // *(...)* 형태는 지문(action)
+                if (inner.startsWith('(') && inner.endsWith(')')) {
+                    segments.push({ type: 'action', text: inner });
+                } else {
+                    segments.push({ type: 'mission', text: inner });
+                }
             } else if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
                 segments.push({ type: 'action', text: trimmed });
             } else if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-                segments.push({ type: 'dialogue', text: trimmed.slice(1, -1) });
+                const sentences = splitDialogue(trimmed.slice(1, -1));
+                sentences.forEach(s => segments.push({ type: 'dialogue', text: s }));
             } else {
-                segments.push({ type: 'dialogue', text: trimmed });
+                const sentences = splitDialogue(trimmed);
+                sentences.forEach(s => segments.push({ type: 'dialogue', text: s }));
             }
         }
         return segments;
@@ -707,14 +735,51 @@
     $('#youtubeBtn').addEventListener('click', () => rewardUseModal.classList.remove('open'));
 
     // ═══════════════════════════════════════
-    //  Mock 메시지 패널 (개별 카드 방식)
+    //  Mock 메시지 패널 (페이지 선택 → 편집)
     // ═══════════════════════════════════════
     const mockList = $('#mockMsgList');
     const mockBody = $('#mockBody');
+    let mockSelectedPage = -1; // -1 = 페이지 선택 화면
 
-    function renderMockCards() {
+    function renderMockPageSelect() {
+        mockSelectedPage = -1;
         mockList.innerHTML = '';
-        aiMessages.forEach((msg, i) => {
+        const title = mockBody.querySelector('h3');
+        title.textContent = 'AI 응답 메시지 편집';
+        const desc = mockBody.querySelector('p');
+        desc.textContent = '편집할 채팅 페이지를 선택하세요.';
+        // 뒤로가기 버튼 숨기기
+        $('#mockBackBtn').style.display = 'none';
+        $('#mockAddBtn').style.display = 'none';
+        $('#mockSaveBtn').style.display = 'none';
+
+        aiMessages.forEach((pageMsgs, i) => {
+            const card = document.createElement('div');
+            card.className = 'mock-page-card';
+            const status = quizStatusData[i] || { location: '', time: '', state: '' };
+            card.innerHTML = `
+                <div class="mock-page-num">페이지 ${i + 1}</div>
+                <div class="mock-page-info">${status.location} ${status.time}</div>
+                <div class="mock-page-count">${pageMsgs.length}개 메시지</div>
+            `;
+            card.addEventListener('click', () => renderMockPageEdit(i));
+            mockList.appendChild(card);
+        });
+    }
+
+    function renderMockPageEdit(pageIdx) {
+        mockSelectedPage = pageIdx;
+        mockList.innerHTML = '';
+        const title = mockBody.querySelector('h3');
+        title.textContent = `페이지 ${pageIdx + 1} 메시지 편집`;
+        const desc = mockBody.querySelector('p');
+        desc.textContent = '각 응답을 개별로 편집하세요.';
+        $('#mockBackBtn').style.display = 'inline-flex';
+        $('#mockAddBtn').style.display = 'flex';
+        $('#mockSaveBtn').style.display = 'flex';
+
+        const pageMsgs = aiMessages[pageIdx];
+        pageMsgs.forEach((msg, i) => {
             const item = document.createElement('div');
             item.className = 'mock-msg-item';
             item.innerHTML = `
@@ -724,7 +789,7 @@
             `;
             mockList.appendChild(item);
         });
-        // textarea 자동 높이 조절
+        // textarea 자동 높이
         mockList.querySelectorAll('textarea').forEach(ta => {
             ta.style.height = 'auto';
             ta.style.height = ta.scrollHeight + 'px';
@@ -737,27 +802,32 @@
         mockList.querySelectorAll('.mock-msg-del').forEach(btn => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.idx);
-                if (aiMessages.length > 1) {
-                    aiMessages.splice(idx, 1);
-                    renderMockCards();
+                if (aiMessages[pageIdx].length > 1) {
+                    aiMessages[pageIdx].splice(idx, 1);
+                    renderMockPageEdit(pageIdx);
                 }
             });
         });
     }
 
-    renderMockCards();
+    renderMockPageSelect();
 
     $('#mockToggle').addEventListener('click', () => mockBody.classList.toggle('open'));
 
+    // 뒤로가기
+    $('#mockBackBtn').addEventListener('click', () => renderMockPageSelect());
+
     // 응답 추가
     $('#mockAddBtn').addEventListener('click', () => {
-        aiMessages.push('새 응답 메시지를 입력하세요.');
-        renderMockCards();
+        if (mockSelectedPage < 0) return;
+        aiMessages[mockSelectedPage].push('새 응답 메시지를 입력하세요.');
+        renderMockPageEdit(mockSelectedPage);
         mockList.scrollTop = mockList.scrollHeight;
     });
 
     // 저장
     $('#mockSaveBtn').addEventListener('click', () => {
+        if (mockSelectedPage < 0) return;
         const textareas = mockList.querySelectorAll('textarea');
         const newMessages = [];
         textareas.forEach(ta => {
@@ -765,8 +835,8 @@
             if (val) newMessages.push(val);
         });
         if (newMessages.length) {
-            aiMessages = newMessages;
-            renderMockCards();
+            aiMessages[mockSelectedPage] = newMessages;
+            renderMockPageEdit(mockSelectedPage);
             showToast('✅ AI 메시지가 저장되었습니다');
         }
     });

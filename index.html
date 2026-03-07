@@ -28,6 +28,7 @@
             <p>각 응답을 개별로 편집하세요. 순서대로 출력됩니다.</p>
             <div class="mock-msg-list" id="mockMsgList"></div>
             <div class="mock-btn-row">
+                <button id="mockBackBtn" class="mock-back-btn" style="display:none;">◀ 뒤로</button>
                 <button id="mockAddBtn" class="mock-add-btn">＋ 응답 추가</button>
                 <button id="mockSaveBtn" class="mock-save-btn">저장하기</button>
             </div>
@@ -97,14 +98,6 @@
 
                 <!-- 2-B: 채팅 화면 -->
                 <div id="chatMainView" style="display:none;">
-                    <!-- 상단 상태바 -->
-                    <div class="chat-status-bar" id="chatStatusBar">
-                        <span class="status-location" id="statusLocation">📍 차 안</span>
-                        <span class="status-divider">|</span>
-                        <span class="status-time" id="statusTime">🕐 이른 새벽</span>
-                        <span class="status-divider">|</span>
-                        <span class="status-state" id="statusState">😴 피곤한 상태</span>
-                    </div>
                     <!-- 호감도 게이지 + 페이지 이동 -->
                     <div class="affinity-bar-wrap">
                         <div class="affinity-nav-row">
@@ -127,6 +120,14 @@
                             </div>
                             <button class="page-nav-btn" id="nextPageBtn" disabled>▶</button>
                         </div>
+                    </div>
+                    <!-- 상태바 (호감도 아래) -->
+                    <div class="chat-status-bar" id="chatStatusBar">
+                        <span class="status-location" id="statusLocation">📍 차 안</span>
+                        <span class="status-divider">|</span>
+                        <span class="status-time" id="statusTime">🕐 이른 새벽</span>
+                        <span class="status-divider">|</span>
+                        <span class="status-state" id="statusState">😴 피곤한 상태</span>
                     </div>
                     <!-- 채팅 영역 -->
                     <div class="chat-area" id="chatArea">
