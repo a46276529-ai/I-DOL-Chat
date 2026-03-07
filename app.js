@@ -364,6 +364,9 @@
         input.value = '';
         userMsgCount++;
 
+        // 미션 팝업 숨기기
+        $('#missionPopup').style.display = 'none';
+
         // 호감도 증가 (5씩)
         increaseAffinity();
 
@@ -371,32 +374,62 @@
         setTimeout(() => showTypingThenMessage(), 800);
     }
 
-    // 서식 파싱: "대사", *지문*, (상황설명) 구분
-    function formatMessageHtml(text) {
-        // 줄바꿈 기준으로 파싱
+    // ───── AI 메시지 파싱 ─────
+    // 텍스트를 세그먼트로 분리: dialogue, action, direction
+    function parseAiMessage(text) {
         const lines = text.split('\n');
-        let html = '';
+        const segments = [];
         for (const line of lines) {
             const trimmed = line.trim();
-            if (!trimmed) {
-                html += '<div class="msg-spacer"></div>';
-                continue;
-            }
+            if (!trimmed) continue;
             if (trimmed.startsWith('*') && trimmed.endsWith('*')) {
-                // 지문 (이탤릭 스타일)
-                html += `<div class="msg-direction">${trimmed.slice(1, -1)}</div>`;
+                segments.push({ type: 'mission', text: trimmed.slice(1, -1) });
             } else if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
-                // 상황 설명
-                html += `<div class="msg-action">${trimmed}</div>`;
+                segments.push({ type: 'action', text: trimmed });
             } else if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-                // 대사
-                html += `<div class="msg-dialogue">${trimmed.slice(1, -1)}</div>`;
+                segments.push({ type: 'dialogue', text: trimmed.slice(1, -1) });
             } else {
-                // 일반 텍스트
-                html += `<div class="msg-text">${trimmed}</div>`;
+                segments.push({ type: 'dialogue', text: trimmed });
             }
         }
-        return html;
+        return segments;
+    }
+
+    // 세그먼트를 순차적으로 채팅에 추가
+    function addAiSegments(segments) {
+        const container = $('#chatMessages');
+        if (!container) return;
+        let delay = 0;
+
+        segments.forEach((seg) => {
+            if (seg.type === 'dialogue') {
+                delay += 200;
+                setTimeout(() => {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'chat-bubble ai';
+                    bubble.textContent = seg.text;
+                    container.appendChild(bubble);
+                    scrollToBottom();
+                }, delay);
+            } else if (seg.type === 'action') {
+                delay += 150;
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'chat-action-text';
+                    el.textContent = seg.text;
+                    container.appendChild(el);
+                    scrollToBottom();
+                }, delay);
+            } else if (seg.type === 'mission') {
+                delay += 300;
+                setTimeout(() => {
+                    const popup = $('#missionPopup');
+                    $('#missionText').textContent = seg.text;
+                    popup.style.display = 'block';
+                    scrollToBottom();
+                }, delay);
+            }
+        });
     }
 
     function addBubble(text, type) {
@@ -404,11 +437,7 @@
         if (!container) return;
         const bubble = document.createElement('div');
         bubble.className = `chat-bubble ${type}`;
-        if (type === 'ai') {
-            bubble.innerHTML = formatMessageHtml(text);
-        } else {
-            bubble.textContent = text;
-        }
+        bubble.textContent = text;
         container.appendChild(bubble);
         scrollToBottom();
     }
@@ -438,7 +467,8 @@
 
             // 텍스트 메시지
             if (aiMsgIndex < aiMessages.length) {
-                addBubble(aiMessages[aiMsgIndex], 'ai');
+                const segments = parseAiMessage(aiMessages[aiMsgIndex]);
+                addAiSegments(segments);
                 aiMsgIndex++;
             } else {
                 addBubble('💜 (더 이상의 메시지가 없습니다)', 'ai');

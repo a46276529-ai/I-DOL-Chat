@@ -726,45 +726,59 @@ body {
   border-bottom-left-radius: 4px;
   align-self: flex-start;
   border: 1px solid rgba(168, 85, 247, .1);
-  max-width: 88%
+  max-width: 92%
 }
 
-/* AI 메시지 서식 */
-.msg-dialogue {
-  margin-bottom: 4px;
-  line-height: 1.65;
-  position: relative;
-  padding-left: 10px;
-  border-left: 2.5px solid rgba(168, 85, 247, .25)
-}
-
-.msg-direction {
-  font-style: italic;
-  color: #7c3aed;
-  background: rgba(168, 85, 247, .06);
-  border-radius: 8px;
-  padding: 8px 10px;
-  margin: 6px 0;
-  font-size: .76rem;
-  line-height: 1.6;
-  border-left: 3px solid rgba(168, 85, 247, .3)
-}
-
-.msg-action {
+/* 지문 (상황설명) - 프레임 없이 중앙 정렬 */
+.chat-action-text {
   font-style: italic;
   color: #9ca3af;
-  font-size: .74rem;
-  margin: 4px 0;
-  line-height: 1.5
+  font-size: .57rem;
+  text-align: center;
+  padding: 10px 16px;
+  line-height: 1.55;
+  animation: bubbleIn .3s ease-out
 }
 
-.msg-text {
-  margin-bottom: 4px;
-  line-height: 1.65
+/* 매니저 미션 팝업 - 입력창 바로 위 고정 */
+.mission-popup {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  margin: 0 8px 6px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, .08), rgba(236, 72, 153, .06));
+  border: 1.5px solid rgba(168, 85, 247, .2);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  animation: missionSlideUp .4s ease-out
 }
 
-.msg-spacer {
-  height: 6px
+.mission-label {
+  font-size: .68rem;
+  font-weight: 800;
+  color: #7c3aed;
+  margin-bottom: 6px;
+  letter-spacing: .5px
+}
+
+.mission-text {
+  font-size: .75rem;
+  color: #4c1d95;
+  line-height: 1.6;
+  text-align: left
+}
+
+@keyframes missionSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px)
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0)
+  }
 }
 
 .chat-bubble.user {
