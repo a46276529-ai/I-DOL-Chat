@@ -9,7 +9,10 @@
         { id: 'char3', name: '준혁', emoji: '🧡', color: '#fb923c' },
         { id: 'char4', name: '현우', emoji: '💙', color: '#60a5fa' },
         { id: 'char5', name: '태민', emoji: '💚', color: '#34d399' },
-        { id: 'char6', name: '재현', emoji: '🩷', color: '#f9a8d4' }        char1: {
+        { id: 'char6', name: '재현', emoji: '🩷', color: '#f9a8d4' }
+    ];
+    const charData = {
+        char1: {
             profileUrl: 'images/profiles/profile_harin_1772777927736.png',
             chatImages: [
                 'images/daily/harin_daily1_1772778091904.png',

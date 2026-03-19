@@ -1,13 +1,14 @@
 // =====================================================
 // I-DOL Chat API 설정 파일
 // =====================================================
-// ⚠️  이 파일은 절대 GitHub 등 외부에 공개하지 마세요!
-//     .gitignore에 config/api_config.js 를 추가하세요.
+// ⚠️  API_KEY 값이 채워진 상태로는 절대 GitHub에 커밋하지 마세요!
+//     이 파일은 API_KEY가 빈 상태(템플릿)로만 GitHub에 포함됩니다.
 // =====================================================
 
-const APP_CONFIG = {
-    // 여기에 실제 API 키를 붙여넣으세요.
-    API_KEY: 'OG06Y1r8_D-F5WTS7GZ4CxhNsvDr34aW',
+// var 사용: 전역 스코프에서 window.APP_CONFIG로 접근 가능하게 함
+var APP_CONFIG = {
+    // 여기에 실제 API 키를 붙여넣으세요. (배포 시에는 절대 채우지 마세요)
+    API_KEY: '',
 
     // API 서버 URL (변경 불필요)
     API_URL: 'https://llmops.04515.ai',
@@ -16,11 +17,5 @@ const APP_CONFIG = {
     MODEL: 'gemini-2.5-pro',
 
     // 페르소나 프롬프트 (매니저 역할 설정)
-    PERSONA: `<persona>
-<name>매니저</name>
-<description>
-당신은 루미너스(LUMINOUS) 전담 메인 매니저입니다.
-아이돌과 함께 바쁜 스케줄을 소화하며, 담당 멤버를 세심하게 챙기는 프로 매니저입니다.
-</description>
-</persona>`,
+    PERSONA: '<persona><name>매니저</name><description>당신은 루미너스(LUMINOUS) 전담 메인 매니저입니다. 아이돌과 함께 바쁜 스케줄을 소화하며, 담당 멤버를 세심하게 챙기는 프로 매니저입니다.</description></persona>',
 };
