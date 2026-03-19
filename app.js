@@ -76,6 +76,10 @@
         },
     };
 
+    Object.values(charData).forEach(cd => {
+        if (!cd.prompts) cd.prompts = Array(5).fill(cd.prompt || '');
+    });
+
     // ───── 상태 ─────
     let affinity = 0;
     let signTickets = 0;
@@ -84,6 +88,17 @@
     let selectedPersonaChar = null;
     let selectedChatChar = null;
 
+    // ───── 유저 페르소나 데이터 ─────
+    const userData = [
+        { id: 'user1', name: '매니저', profileUrl: 'images/profiles/user_mgr.png' },
+        { id: 'user2', name: '신입 막내멤버(리온)', profileUrl: 'images/profiles/user_rion.png', cost: 15 },
+        { id: 'user3', name: '강소라(Username)', profileUrl: 'images/profiles/user_sora.png', cost: 25 },
+        { id: 'user4', name: '???', profileUrl: '', isSecret: true },
+        { id: 'user5', name: '???', profileUrl: '', isSecret: true },
+        { id: 'user6', name: '???', profileUrl: '', isSecret: true },
+    ];
+    let selectedUserPersona = userData[0];
+
     // 퀴즈 페이지 시스템
     let currentQuizPage = 0;           // 현재 퀴즈 페이지 (0-indexed)
     let quizCleared = [];              // 각 페이지 클리어 여부
@@ -91,6 +106,7 @@
     let normalChatCount = 0;           // 일반 채팅 횟수 (3회마다 +1 호감도)
     let currentPageUserMsgCount = 0;   // 현재 페이지에서의 유저 메시지 수
     let currentPageMsgIndex = 0;       // 현재 페이지에서 다음에 보여줄 AI 메시지 인덱스
+    let apiSessions = [];              // 각 페이지별 API 세션 ID 저장
 
     // 퀴즈별 상태바 정보
     const quizStatusData = [
@@ -218,10 +234,84 @@
             const card = document.createElement('div');
             card.className = 'char-card';
             card.innerHTML = `
-        <img class="char-card-img" src="${getProfileUrl(c.id)}" alt="${c.name}">
+        <div class="char-img-wrap">
+            <img class="char-card-img" src="${getProfileUrl(c.id)}" alt="${c.name}">
+        </div>
         <div class="char-card-name">${c.name}</div>
       `;
             card.addEventListener('click', () => onSelect(c));
+            grid.appendChild(card);
+        });
+    }
+
+    function renderUserGrid() {
+        const grid = $('#personaUserCharGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        userData.forEach(u => {
+            const card = document.createElement('div');
+            card.className = 'char-card';
+            if (selectedUserPersona && selectedUserPersona.id === u.id) {
+                card.classList.add('selected'); // 선택 효과 (CSS 필요 시 추가)
+                card.style.background = 'rgba(168, 85, 247, 0.15)';
+                card.style.borderColor = 'rgba(168, 85, 247, 0.1)'; // 테두리를 기본 테두리와 똑같이 맞추어 실선 강조 해제
+            }
+            if (u.cost) {
+                card.classList.add('locked-hover');
+            }
+
+            const imgWrap = document.createElement('div');
+            imgWrap.className = 'char-img-wrap';
+            
+            const img = document.createElement('img');
+            img.className = 'char-card-img';
+            img.src = u.isSecret ? 'images/profiles/profile_daeun_1772778064133.png' : u.profileUrl;
+            if (u.isSecret) img.style.filter = "brightness(0.7) grayscale(0.8) opacity(0.35)";
+            img.alt = u.name;
+
+            imgWrap.appendChild(img);
+
+            if (u.cost) {
+                const overlay = document.createElement('div');
+                overlay.className = 'persona-lock-overlay';
+                overlay.innerHTML = `${u.cost}⭐`;
+                imgWrap.appendChild(overlay);
+            } else if (u.isSecret) {
+                const overlay = document.createElement('div');
+                overlay.className = 'persona-lock-overlay';
+                overlay.innerHTML = `?`;
+                overlay.style.opacity = 1;
+                overlay.style.background = 'rgba(0, 0, 0, 0.15)'; // 검은색 투명도를 대폭 낮춰 부드럽게 변경
+                overlay.style.color = '#fff';
+                overlay.style.fontSize = '1.3rem'; // 물음표 크기 살짝 향상
+                imgWrap.appendChild(overlay);
+            }
+
+            const name = document.createElement('div');
+            name.className = 'char-card-name';
+            name.innerHTML = u.name.replace('\\n', '<br>');
+
+            card.appendChild(imgWrap);
+            card.appendChild(name);
+
+            card.addEventListener('click', () => {
+                if (u.isSecret) {
+                    showToast('곧 추가될 페르소나 입니다');
+                    return;
+                }
+                if (u.cost) {
+                    $('#unlockModalText').textContent = `${u.cost}⭐로 페르소나를 해금하시겠습니까?`;
+                    $('#unlockCostText').textContent = `${u.cost}⭐`;
+                    $('#unlockModal').classList.add('open');
+                    return;
+                }
+
+                // 매니저 선택 시
+                selectedUserPersona = u;
+                renderUserGrid();
+                showToast(`[${u.name}] 페르소나가 갱신되었습니다.`);
+            });
+
             grid.appendChild(card);
         });
     }
@@ -238,13 +328,32 @@
             // 채팅 탭 전환 시 그리드 새로고침 (프로필 변경 반영)
             if (target === 'chat') {
                 renderChatCharGrid();
+            } else if (target === 'persona-user') {
+                renderUserGrid();
             }
         });
     });
 
+    // 해금 모달 이벤트 처리
+    const unlockModal = $('#unlockModal');
+    if (unlockModal) {
+        $('#unlockCancelBtn').addEventListener('click', () => {
+            unlockModal.classList.remove('open');
+        });
+        $('#unlockConfirmBtn').addEventListener('click', () => {
+            showToast('스타가 부족합니다');
+            unlockModal.classList.remove('open');
+        });
+        unlockModal.addEventListener('click', (e) => {
+            if (e.target === unlockModal) unlockModal.classList.remove('open');
+        });
+    }
+
     // ═══════════════════════════════════════
     //  1. 페르소나 페이지
     // ═══════════════════════════════════════
+
+    let selectedPromptIndex = 0;
 
     // 그리드 렌더
     renderCharGrid('#personaCharGrid', (char) => {
@@ -253,9 +362,14 @@
         $('#personaSettingView').style.display = 'block';
         // 프로필 이미지 세팅
         $('#personaProfileImg').src = getProfileUrl(char.id);
+        
+        selectedPromptIndex = 0;
+        const pageSelect = $('#personaPageSelect');
+        if (pageSelect) pageSelect.value = "0";
+
         // 기본 프롬프트 세팅
         const cd = charData[char.id];
-        $('#personaInput').value = cd && cd.prompt ? cd.prompt : '';
+        $('#personaInput').value = cd && cd.prompts ? cd.prompts[selectedPromptIndex] : '';
     });
 
     // 뒤로가기
@@ -268,14 +382,34 @@
             $('#personaSelectView').style.display = 'none';
             $('#personaSettingView').style.display = 'block';
             $('#personaProfileImg').src = getProfileUrl(char.id);
+            
+            selectedPromptIndex = 0;
+            const pageSelect = $('#personaPageSelect');
+            if (pageSelect) pageSelect.value = "0";
+            
             // 기본 프롬프트 세팅
             const cd = charData[char.id];
-            $('#personaInput').value = cd && cd.prompt ? cd.prompt : '';
+            $('#personaInput').value = cd && cd.prompts ? cd.prompts[selectedPromptIndex] : '';
         });
     });
 
+    const pageSelect = $('#personaPageSelect');
+    if (pageSelect) {
+        pageSelect.addEventListener('change', (e) => {
+            // 다른 페이지를 선택하기 전에 현재 화면에 적힌 내용을 임시 저장
+            if (selectedPersonaChar && charData[selectedPersonaChar.id]) {
+                charData[selectedPersonaChar.id].prompts[selectedPromptIndex] = $('#personaInput').value;
+            }
+            selectedPromptIndex = parseInt(e.target.value);
+            $('#personaInput').value = charData[selectedPersonaChar.id].prompts[selectedPromptIndex] || '';
+        });
+    }
+
     // 저장 버튼
     $('#personaSaveBtn').addEventListener('click', () => {
+        if (selectedPersonaChar && charData[selectedPersonaChar.id]) {
+            charData[selectedPersonaChar.id].prompts[selectedPromptIndex] = $('#personaInput').value;
+        }
         showToast('✅ 설정이 완료되었습니다');
     });
 
@@ -393,6 +527,7 @@
         currentPageUserMsgCount = 0;
         quizCleared = aiMessages.map(() => false);
         quizPageChatHistory = aiMessages.map(() => []);
+        apiSessions = aiMessages.map(() => null);
         $('#affinityFill').style.width = '0%';
         $('#affinityText').textContent = '0 / 100';
         $('#chatStartWrap').style.display = 'flex';
@@ -570,46 +705,164 @@
             }
         }
 
-        // AI 응답: 현재 페이지의 다음 메시지 표시
-        setTimeout(() => showNextPageMessage(), 800);
+        // AI 응답 (API로 생성)
+        generateAIResponse(currentQuizPage, text);
     }
 
-    // 현재 페이지의 다음 AI 응답 메시지 표시
-    function showNextPageMessage() {
-        const pageMsgs = aiMessages[currentQuizPage];
-        currentPageMsgIndex++;
-        // 다음 메시지가 없으면 아무것도 표시 안함
-        if (currentPageMsgIndex >= pageMsgs.length) return;
+    async function createChatSession() {
+        try {
+            // Cloudflare Pages Functions 프록시를 통해 요청 (API 키는 서버에서 주입)
+            const res = await fetch('/api/proxy/v1/chat-sessions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!res.ok) {
+                const errText = await res.text();
+                console.error("API Error Response:", res.status, errText);
+                return { error: `HTTP ${res.status}: ${errText || 'API Server Error'}` };
+            }
+            const data = await res.json();
+            return { id: data.id }; // Returns session uuid
+        } catch (e) {
+            console.error("Network or CORS error:", e);
+            return { error: `Network/CORS error: ${e.message}` };
+        }
+    }
 
+    async function generateAIResponse(pageIdx, userText) {
         const container = $('#chatMessages');
         if (!container) return;
 
-        const typing = document.createElement('div');
-        typing.className = 'typing-indicator';
-        typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-        container.appendChild(typing);
+        // 메인 타이핑 인디케이터 (API 통신 대기 및 버퍼링 중)
+        const typingBox = document.createElement('div');
+        typingBox.className = 'typing-indicator';
+        typingBox.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+        container.appendChild(typingBox);
         scrollToBottom();
 
-        setTimeout(() => {
-            typing.remove();
-            const segments = parseAiMessage(pageMsgs[currentPageMsgIndex]);
-            addAiSegments(segments);
-            segments.forEach(seg => {
-                quizPageChatHistory[currentQuizPage].push({ type: 'ai-segment', segType: seg.type, text: seg.text });
+        // 1. 세션 확인 및 생성
+        if (!apiSessions[pageIdx]) {
+            const sessionResult = await createChatSession();
+            if (sessionResult.error) {
+                typingBox.remove();
+                addBubble(`[세션 생성 실패] ${sessionResult.error.message || sessionResult.error}`, 'ai');
+                return;
+            }
+            apiSessions[pageIdx] = sessionResult.id;
+        }
+        
+        const sessionId = apiSessions[pageIdx];
+
+        try {
+            // 프롬프트 및 캐릭터명 가져오기
+            const formatInstruction = "\n\n[중요: 필수 출력 형식]\n캐릭터의 모든 행동, 표정, 감정 묘사(지문)는 반드시 소괄호 `(...)` 기호 안에 작성하세요. 대사는 기호 밖에 작성하세요. 절대로 대사와 지문을 섞어 쓰지 마세요.\n예시: (눈을 비비며) 벌써 아침이에요?";
+            const basePrompt = selectedChatChar ? charData[selectedChatChar.id].prompts[currentQuizPage] : '';
+            const charPrompt = basePrompt + formatInstruction;
+            const charName = selectedChatChar ? selectedChatChar.name : "AI";
+            
+            const payload = {
+                model: "gemini-2.5-pro",
+                context: {
+                    messages: [{ 
+                        role: "user", 
+                        content: userText,
+                        createdAt: new Date().toISOString()
+                    }],
+                    persona: charPrompt,
+                    character: charName,
+                }
+            };
+
+            const res = await fetch(`/api/proxy/v1/chat-sessions/${sessionId}/talk`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
             });
 
-            // 이미지 표시
+            if (!res.ok) {
+                typingBox.remove();
+                addBubble("API 응답 오류가 발생했습니다.", 'ai');
+                return;
+            }
+
+            // 2. 응답 파싱 시작
+            const contentType = res.headers.get('content-type') || '';
+            let fullAiText = '';
+
+            if (contentType.includes('application/json')) {
+                // 스트리밍이 아니고 한 번에 JSON으로 온 경우
+                const data = await res.json();
+                typingBox.remove();
+                
+                if (data.error) {
+                    addBubble(`[에러] ${data.error.message || data.error}`, 'ai');
+                    return;
+                }
+                fullAiText = data.content || data.text || data.message || JSON.stringify(data);
+            } else {
+                // SSE(Server-Sent Events) 스트리밍 파싱 (이때 화면에는 타이핑 아이콘만 유지)
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let sseBuffer = ''; 
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    sseBuffer += decoder.decode(value, { stream: true });
+                    const lines = sseBuffer.split('\n');
+                    
+                    sseBuffer = lines.pop() || '';
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const dataStr = line.slice(6).trim();
+                            if (dataStr === '[DONE]') continue;
+                            if (!dataStr) continue;
+
+                            try {
+                                const parsed = JSON.parse(dataStr);
+                                if (parsed.type === 'text-delta') {
+                                    fullAiText += parsed.delta;
+                                    // 스트리밍을 직접 화면에 그리지 않고 버퍼에만 쌓음
+                                } 
+                            } catch(e) { }
+                        }
+                    }
+                }
+                typingBox.remove();
+            }
+
+            let finalImageDelay = 0;
+            if (fullAiText.trim()) {
+                // 텍스트를 모두 받아온 후, 기존 '첫 메시지' 파싱 로직처럼 대사/행동 분리 후 시간차 렌더링
+                const segments = parseAiMessage(fullAiText.trim());
+                finalImageDelay = addAiSegments(segments) || 0;
+                segments.forEach(seg => {
+                    quizPageChatHistory[currentQuizPage].push({ type: 'ai-segment', segType: seg.type, text: seg.text });
+                });
+            }
+
+            // 3. 이미지 표시 (첫 번째 유저 채팅 이후 1회 표시, 모든 텍스트 타이핑 완료 후 등장)
             if (currentPageUserMsgCount === 1 && selectedChatChar) {
                 const images = charData[selectedChatChar.id].chatImages;
-                if (images.length > 0) {
+                if (images && images.length > 0) {
                     const randImg = images[Math.floor(Math.random() * images.length)];
                     setTimeout(() => {
                         addChatImage(randImg);
                         quizPageChatHistory[currentQuizPage].push({ type: 'image', url: randImg });
-                    }, 600);
+                    }, finalImageDelay + 500);
                 }
             }
-        }, 1200);
+
+        } catch (e) {
+            console.error(e);
+            aiBubble.textContent = "에러가 발생했습니다.";
+        }
     }
 
     // ───── AI 메시지 파싱 ─────
@@ -630,29 +883,44 @@
     }
 
     function parseAiMessage(text) {
-        const lines = text.split('\n');
         const segments = [];
-        for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed) continue;
-            if (trimmed.startsWith('*') && trimmed.endsWith('*')) {
-                const inner = trimmed.slice(1, -1).trim();
-                // *(...)* 형태는 지문(action)
+        // 지문/행동묘사 (괄호나 별표로 묶인 부분)를 본문과 분리
+        const regex = /(\*[\s\S]*?\*|\([\s\S]*?\))/g;
+        const parts = text.split(regex);
+        
+        parts.forEach(part => {
+            let p = part.trim();
+            if (!p) return;
+            
+            let isAction = false;
+            let actionText = p;
+            
+            if (p.startsWith('*') && p.endsWith('*')) {
+                const inner = p.slice(1, -1).trim();
+                // \*(...)\* 형태는 지문(action)
                 if (inner.startsWith('(') && inner.endsWith(')')) {
-                    segments.push({ type: 'action', text: inner });
+                    isAction = true;
+                    actionText = inner;
                 } else {
                     segments.push({ type: 'mission', text: inner });
+                    return;
                 }
-            } else if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
-                segments.push({ type: 'action', text: trimmed });
-            } else if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-                const sentences = splitDialogue(trimmed.slice(1, -1));
-                sentences.forEach(s => segments.push({ type: 'dialogue', text: s }));
+            } else if (p.startsWith('(') && p.endsWith(')')) {
+                isAction = true;
+                actionText = p;
+            }
+
+            if (isAction) {
+                segments.push({ type: 'action', text: actionText });
             } else {
-                const sentences = splitDialogue(trimmed);
+                // 따옴표 제거
+                if (p.startsWith('"') && p.endsWith('"')) {
+                    p = p.slice(1, -1).trim();
+                }
+                const sentences = splitDialogue(p);
                 sentences.forEach(s => segments.push({ type: 'dialogue', text: s }));
             }
-        }
+        });
         return segments;
     }
 
@@ -660,6 +928,7 @@
         const container = $('#chatMessages');
         if (!container) return;
         let delay = 0;
+        const typeSpeed = 30; // 한 글자당 30ms
 
         segments.forEach((seg) => {
             if (seg.type === 'dialogue') {
@@ -667,29 +936,46 @@
                 setTimeout(() => {
                     const bubble = document.createElement('div');
                     bubble.className = 'chat-bubble ai';
-                    bubble.textContent = seg.text;
                     container.appendChild(bubble);
-                    scrollToBottom();
+                    typeWriter(bubble, seg.text, typeSpeed);
                 }, delay);
+                delay += seg.text.length * typeSpeed + 300;
             } else if (seg.type === 'action') {
                 delay += 450;
                 setTimeout(() => {
                     const el = document.createElement('div');
                     el.className = 'chat-action-text';
-                    el.textContent = seg.text;
                     container.appendChild(el);
-                    scrollToBottom();
+                    typeWriter(el, seg.text, typeSpeed);
                 }, delay);
+                delay += seg.text.length * typeSpeed + 200;
             } else if (seg.type === 'mission') {
                 delay += 600;
                 setTimeout(() => {
                     const popup = $('#missionPopup');
                     $('#missionText').textContent = seg.text;
                     popup.style.display = 'block';
-                    scrollToBottom();
+                    scrollToBottom('smooth');
                 }, delay);
+                delay += 1000;
             }
         });
+
+        return delay;
+    }
+
+    function typeWriter(element, text, speed) {
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                element.textContent += text.charAt(i);
+                i++;
+                scrollToBottom('auto'); // 글자가 쳐질 때는 튀지 않게 즉시 스크롤 유지
+                setTimeout(type, speed);
+            }
+        }
+        type();
+        scrollToBottom('smooth'); // 말풍선이 처음 생기며 높이가 커질 때는 부드럽게
     }
 
     function addBubble(text, type) {
@@ -699,7 +985,7 @@
         bubble.className = `chat-bubble ${type}`;
         bubble.textContent = text;
         container.appendChild(bubble);
-        scrollToBottom();
+        scrollToBottom('smooth');
     }
 
     function addChatImage(url) {
@@ -709,13 +995,17 @@
         img.className = 'chat-image';
         img.src = url;
         container.appendChild(img);
-        scrollToBottom();
+        img.onload = () => scrollToBottom('smooth');
     }
 
-    function scrollToBottom() {
+    function scrollToBottom(behavior = 'smooth') {
         const area = $('#chatArea');
         requestAnimationFrame(() => {
-            area.scrollTop = area.scrollHeight;
+            // 부드러운 스크롤 적용
+            area.scrollTo({
+                top: area.scrollHeight,
+                behavior: behavior
+            });
         });
     }
 
