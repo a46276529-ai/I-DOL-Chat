@@ -284,18 +284,6 @@
     <!-- ===== 리워드 이펙트 ===== -->
     <div class="reward-effect" id="rewardEffect"></div>
 
-    <script src="config/api_config.js"></script>
-    <script>
-        // api_config.js 로드 실패 시 기본값 보장 (앱이 멈추지 않도록)
-        if (typeof APP_CONFIG === 'undefined') {
-            window.APP_CONFIG = {
-                API_KEY: '',
-                API_URL: 'https://llmops.04515.ai',
-                MODEL: 'gemini-2.5-pro',
-                PERSONA: '<persona><name>매니저</name><description>루미너스 전담 메인 매니저</description></persona>'
-            };
-        }
-    </script>
     <script src="app.js"></script>
 </body>
 
